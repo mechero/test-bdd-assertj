@@ -1,5 +1,7 @@
 package com.thepracticaldeveloper.population;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,15 +35,21 @@ public class CityServiceTest {
         final City inputCity = new City(null, testCityName, null);
 
         // Given
-        given(populationService.forCity(testCityName)).willReturn(testPopulation);
+        given(populationService.forCity(testCityName))
+            .willReturn(testPopulation);
         given(cityRepository.save(any(City.class)))
-            .willAnswer(answer -> ((City) answer.getArgument(0)).copyWithId(1L));
+            .willAnswer(answer -> ((City) answer.getArgument(0)).copyWithId(randomLong()));
 
         // When
         final City actualCity = cityService.enrichAndSaveCity(inputCity);
 
         // Then
-        final City expectedCity = new City(1L, testCityName, testPopulation);
-        assertThat(actualCity).as("City should be enriched and stored").isEqualTo(expectedCity);
+        final City expectedCity = new City(null, testCityName, testPopulation);
+        assertThat(actualCity).as("City should be enriched and stored")
+            .isEqualToIgnoringGivenFields(expectedCity, "id");
+    }
+
+    private long randomLong() {
+        return ThreadLocalRandom.current().nextLong(1000L);
     }
 }

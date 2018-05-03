@@ -45,7 +45,9 @@ public class CityServiceTest {
 
         // Then
         final City expectedCity = new City(null, testCityName, testPopulation);
-        assertThat(actualCity).as("City should be enriched and stored")
+        assertThat(actualCity.getId()).as("City ID should be set")
+            .isNotNull();
+        assertThat(actualCity).as("City should be enriched")
             .isEqualToIgnoringGivenFields(expectedCity, "id");
     }
 

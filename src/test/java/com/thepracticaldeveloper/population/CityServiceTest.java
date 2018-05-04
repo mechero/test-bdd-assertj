@@ -1,5 +1,6 @@
 package com.thepracticaldeveloper.population;
 
+import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ThrowableAssert;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,6 +31,7 @@ public class CityServiceTest {
   @Before
   public void setup() {
     cityService = new CityService(cityRepository, populationService);
+    Assertions.useRepresentation(new CityRepresentation());
   }
 
   @Test
@@ -65,7 +67,9 @@ public class CityServiceTest {
     // Then
     assertThatIllegalArgumentException()
       .as("Check that input city when creating can't have an ID")
-      .isThrownBy(deferredCall);
+      .isThrownBy(deferredCall)
+      .as("Check that message contains the city name")
+      .withMessageContaining(inputCity.getName());
   }
 
   private long randomLong() {

@@ -34,9 +34,8 @@ public class CityServiceTest {
 
   @Test
   public void createCity() {
-    final City inputCity = new City(null, TEST_CITY_NAME, null);
-
     // Given
+    final City inputCity = new City(null, TEST_CITY_NAME, null);
     given(populationService.forCity(TEST_CITY_NAME))
       .willReturn(TEST_POPULATION);
     given(cityRepository.save(any(City.class)))
@@ -57,18 +56,13 @@ public class CityServiceTest {
 
   @Test
   public void createCityWithIdThrowsException() {
+    // Given
     final City inputCity = new City(1L, TEST_CITY_NAME, null);
 
-    // Given
-    given(populationService.forCity(TEST_CITY_NAME))
-      .willReturn(TEST_POPULATION);
-    given(cityRepository.save(any(City.class)))
-      .willAnswer(answer -> ((City) answer.getArgument(0)).copyWithId(randomLong()));
-
-    // Given
+    // When
     final ThrowableAssert.ThrowingCallable deferredCall = () -> cityService.enrichAndCreateCity(inputCity);
 
-    // When / Then
+    // Then
     assertThatIllegalArgumentException()
       .as("Check that input city when creating can't have an ID")
       .isThrownBy(deferredCall);

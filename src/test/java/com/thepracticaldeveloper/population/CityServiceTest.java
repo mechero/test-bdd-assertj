@@ -27,11 +27,11 @@ public class CityServiceTest {
   private PopulationService populationService;
 
   private CityService cityService;
-  public static final String MALAGA = "Malaga";
-  public static final String AMSTERDAM = "Amsterdam";
-  public static final String BARCELONA = "Barcelona";
-  public static final int MALAGA_POPULATION = 569_000;
-  public static final int BARCELONA_POPULATION = 1_609_000;
+  private static final String MALAGA = "Malaga";
+  private static final String AMSTERDAM = "Amsterdam";
+  private static final String BARCELONA = "Barcelona";
+  private static final int MALAGA_POPULATION = 569_000;
+  private static final int BARCELONA_POPULATION = 1_609_000;
 
   @Before
   public void setup() {

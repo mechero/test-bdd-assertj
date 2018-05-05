@@ -1,10 +1,12 @@
 package com.thepracticaldeveloper.population;
 
+import java.util.Optional;
+
 public interface PopulationService {
   /**
    * Retrieves the population for a given city name
-   * @param cityName
+   *
    * @return its population
    */
-  int forCity(final String cityName);
+  Optional<Integer> forCity(final String cityName);
 }

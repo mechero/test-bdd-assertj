@@ -1,6 +1,11 @@
 package com.thepracticaldeveloper.population;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
+
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.ThrowableAssert;
 import org.junit.Before;
 import org.junit.Test;
@@ -8,12 +13,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.concurrent.ThreadLocalRandom;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CityServiceTest {
@@ -25,8 +27,11 @@ public class CityServiceTest {
   private PopulationService populationService;
 
   private CityService cityService;
-  public static final String TEST_CITY_NAME = "Malaga";
-  public static final int TEST_POPULATION = 569_000;
+  public static final String MALAGA = "Malaga";
+  public static final String AMSTERDAM = "Amsterdam";
+  public static final String BARCELONA = "Barcelona";
+  public static final int MALAGA_POPULATION = 569_000;
+  public static final int BARCELONA_POPULATION = 1_609_000;
 
   @Before
   public void setup() {
@@ -37,9 +42,9 @@ public class CityServiceTest {
   @Test
   public void createCity() {
     // Given
-    final City inputCity = new City(null, TEST_CITY_NAME, null);
-    given(populationService.forCity(TEST_CITY_NAME))
-      .willReturn(TEST_POPULATION);
+    final City inputCity = new City(null, MALAGA, null);
+    given(populationService.forCity(MALAGA))
+      .willReturn(Optional.of(MALAGA_POPULATION));
     given(cityRepository.save(any(City.class)))
       .willAnswer(answer -> ((City) answer.getArgument(0)).copyWithId(randomLong()));
 
@@ -47,7 +52,7 @@ public class CityServiceTest {
     final City actualCity = cityService.enrichAndCreateCity(inputCity);
 
     // Then
-    final City expectedCity = new City(null, TEST_CITY_NAME, TEST_POPULATION);
+    final City expectedCity = new City(null, MALAGA, MALAGA_POPULATION);
     assertThat(actualCity.getId())
       .as("Check that City ID is set when stored.")
       .isNotNull();
@@ -59,7 +64,7 @@ public class CityServiceTest {
   @Test
   public void createCityWithIdThrowsException() {
     // Given
-    final City inputCity = new City(1L, TEST_CITY_NAME, null);
+    final City inputCity = new City(1L, MALAGA, null);
 
     // When
     final ThrowableAssert.ThrowingCallable deferredCall = () -> cityService.enrichAndCreateCity(inputCity);
@@ -70,6 +75,32 @@ public class CityServiceTest {
       .isThrownBy(deferredCall)
       .as("Check that message contains the city name")
       .withMessageContaining(inputCity.getName());
+  }
+
+  @Test
+  public void getCities() {
+    // Given
+    final City malaga = new City(1L, MALAGA, MALAGA_POPULATION);
+    // let's say the service did not work for Amsterdam so it's stored without population...
+    final City amsterdam = new City(2L, AMSTERDAM, null);
+    final City barcelona = new City(3L, BARCELONA, BARCELONA_POPULATION);
+    given(cityRepository.getAllCities()).willReturn(List.of(malaga, amsterdam, barcelona));
+
+    // When
+    final List<City> cities = cityService.getAllValidCities();
+
+    // Then
+    SoftAssertions.assertSoftly(softly -> {
+      softly.assertThat(cities)
+        .as("Should contain only two cities")
+        .hasSize(2);
+      softly.assertThat(cities).extracting("population")
+        .as("Should not contain null populations")
+        .doesNotContainNull();
+      softly.assertThat(cities).extracting("name")
+        .as("Should contain names in alphabetical order")
+        .containsSequence(BARCELONA, MALAGA);
+    });
   }
 
   private long randomLong() {

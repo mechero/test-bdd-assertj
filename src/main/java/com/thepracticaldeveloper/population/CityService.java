@@ -33,7 +33,7 @@ public class CityService {
     final List<City> storedCities = repository.getAllCities();
     // Remove those with empty population, and sort them alphabetically
     return storedCities.stream()
-      // BLOG-XX comment this line to check how SoftAssertions work
+      // Comment only the following line to check how SoftAssertions work
       .filter(city -> city.getPopulation() != null)
       .sorted(Comparator.comparing(City::getName))
       .collect(Collectors.toList());

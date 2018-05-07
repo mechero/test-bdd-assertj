@@ -57,7 +57,7 @@ public class CityServiceTest {
       .as("Check that City ID is set when stored.")
       .isNotNull();
     assertThat(actualCity)
-      .as("Check that City values are the expected ones")
+      .as("Check that City name is correct and city population is filled in.")
       .isEqualToIgnoringGivenFields(expectedCity, "id");
   }
 

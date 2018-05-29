@@ -1,21 +1,21 @@
 package com.thepracticaldeveloper.population;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
-
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.assertj.core.api.ThrowableAssert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.assertj.core.api.Assertions.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
+
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.assertj.core.api.BDDAssertions.then;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.*;
+import static org.mockito.BDDMockito.given;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CityServiceTest {
@@ -53,10 +53,10 @@ public class CityServiceTest {
 
     // Then
     final City expectedCity = new City(null, MALAGA, MALAGA_POPULATION);
-    assertThat(actualCity.getId())
+    then(actualCity.getId())
       .as("Check that City ID is set when stored.")
       .isNotNull();
-    assertThat(actualCity)
+    then(actualCity)
       .as("Check that City name is correct and city population is filled in.")
       .isEqualToIgnoringGivenFields(expectedCity, "id");
   }
@@ -67,14 +67,13 @@ public class CityServiceTest {
     final City inputCity = new City(1L, MALAGA, null);
 
     // When
-    final ThrowableAssert.ThrowingCallable deferredCall = () -> cityService.enrichAndCreateCity(inputCity);
+    final Throwable throwable = catchThrowable(() -> cityService.enrichAndCreateCity(inputCity));
 
     // Then
-    assertThatIllegalArgumentException()
-      .as("Check that input city when creating can't have an ID")
-      .isThrownBy(deferredCall)
+    then(throwable).as("An IAE should be thrown if a city with ID is passed")
+      .isInstanceOf(IllegalArgumentException.class)
       .as("Check that message contains the city name")
-      .withMessageContaining(inputCity.getName());
+      .hasMessageContaining(inputCity.getName());
   }
 
   @Test
